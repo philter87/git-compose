@@ -1,7 +1,13 @@
 {
-  "name": "gitcompose",
+  "name": "@philter87/gitco",
   "version": "1.0.0",
-  "description": "",
+  "description": "A simple CLI tool for automatic docker-compose deployments based on git repositories",
+  "keywords": [
+    "git",
+    "docker",
+    "docker-compose",
+    "deployment"
+  ],
   "main": "dist/index.js",
   "bin": {
     "gitco": "./dist/index.js"
@@ -10,7 +16,9 @@
     "build": "npx tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "Philip Hjorth Christiansen",
+  "repository": "https://github.com/philter87/git-compose",
+  "homepage": "https://github.com/philter87/git-compose#readme",
   "license": "ISC",
   "dependencies": {
     "commander": "^12.1.0",
