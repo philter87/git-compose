@@ -1,6 +1,6 @@
 {
-  "name": "gitco",
-  "version": "1.0.0",
+  "name": "git-compose",
+  "version": "0.1.0",
   "description": "A simple CLI tool for automatic docker-compose deployments based on git repositories",
   "keywords": [
     "git",
