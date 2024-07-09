@@ -1,28 +1,37 @@
+import { spawnSync } from "child_process";
 import { ITerminal, Terminal } from "../terminal";
 
-export const validationCheck = (terminal: ITerminal = new Terminal()): string[] => {
-    const dockerVersion = terminal.run("docker", ["--version"])
+
+export const validationCheck = async (terminal: ITerminal = new Terminal()): Promise<void> => {
+    terminal.logInfo("Checking system requirements...")
+
+    const dockerVersion = await terminal.run("docker", ["--version"])
+    const result = await spawnSync("docker", ["--version"], {encoding: "utf-8"});
+    console.log("dockerVersion", dockerVersion.err, dockerVersion.msg);
     if (dockerVersion.err) {
-        return ["Docker is not installed. Please install Docker and try again."];
+        terminal.logError("Docker is not installed. Please install Docker and try again")
+        return;
     }
 
-    const dockerPs = terminal.run("docker", ["ps"]);
+    const dockerPs = await terminal.run("docker", ["ps"]);
     if (dockerPs.err.includes("running")) {
-        return [dockerPs.err, "", "Docker is not running. Please start Docker and try again."];
+        terminal.logError(dockerPs.err, "", "Docker is not running. Please start Docker and try again.")
+        return;
     }
 
     if (dockerPs.err.includes("permission denied")) {
-        return [dockerPs.err, "", "Docker commands are not allowed. Docker might be running as root user. Use 'sudo -s' and try the command again."];
+        terminal.logError(dockerPs.err, "", "Docker commands are not allowed. Docker might be running as root user. Use 'sudo -s' and try the command again.");
+        return;
     }
 
     if (dockerPs.err) {
-        return [dockerPs.err, "", "Unable to run docker commands. Please check your Docker installation and try again."];
+        terminal.logError(dockerPs.err, "", "Unable to run docker commands. Please check your Docker installation and try again.");
+        return;
     }
 
-    const gitVersion = terminal.run("git", ["--version"]);
+    const gitVersion = await terminal.run("git", ["--version"]);
     if (gitVersion.err) {
-        return [gitVersion.err, "", "Git is not installed. Please install Git and try again."];
+        terminal.logError(gitVersion.err, "", "Git is not installed. Please install Git and try again.");
+        return;
     }
-
-    return [];
 }

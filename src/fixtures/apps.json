@@ -1,0 +1,9 @@
+{
+    "apps": [
+        {
+            "githubRepo": "philter87/git-compose",
+            "branch": "main",
+            "directory": "helper-apps/test-app"
+        }
+    ]
+}

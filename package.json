@@ -14,8 +14,9 @@
   },
   "scripts": {
     "build": "npx tsc",
+    "buildw": "npx tsc --watch",
     "test": "jest",
-    "test-watch": "jest --watch"
+    "testw": "jest --watch"
   },
   "author": "Philip Hjorth Christiansen",
   "repository": "https://github.com/philter87/git-compose",
