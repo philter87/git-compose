@@ -1,0 +1,11 @@
+{
+    "apps": [
+        {
+            "githubRepo": "philter87/home-server",
+            "githubRepoSsh": "git@github.com:philter87/home-server.git",
+            "composeFiles": ["docker-compose.yml"],
+            "branch": "main",
+            "directory": "helper-apps/test-app"
+        }
+    ]
+}

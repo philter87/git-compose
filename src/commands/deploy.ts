@@ -1,14 +1,14 @@
 import path from "path";
-import { Context } from "../context";
+import { Context } from "../models/context";
 import * as fs from 'fs';
 
 export const deploy = (c: Context) => {
-    c.config.apps.forEach((app) => {
-        console.log("Deploying app: " + app.githubRepo);
-        var repoName = app.githubRepo.split("/")[1];
+    c.getAppsConfig().apps.forEach((app) => {
+        c.logInfo("")
+        c.logInfo("Deploying app: " + app.appName)
 
         var appsDir = path.join(process.cwd(), "apps");
-        var repoRootDir = path.join(appsDir, repoName);
+        var repoRootDir = path.join(appsDir, app.appName!);
         var composeDir = path.join(repoRootDir, app.directory);
 
         // Create apps directory if missing
@@ -17,19 +17,23 @@ export const deploy = (c: Context) => {
         // Check if the directory is empty
         const isFirstDeployment = !fs.existsSync(repoRootDir);
         if(isFirstDeployment) {
-            var clone = c.terminal.run("git clone " + app.githubRepoSsh, appsDir);
-            console.log("Cloning app: " + clone);
+            var clone = c.terminal.run("git clone " + app.githubRepoSsh + " " + app.appName!, appsDir);
+            if(clone.err) {
+                c.terminal.logError("Error cloning repo: " + clone.err);
+            }
         }
         
         var checkout = c.terminal.run("git checkout " + app.branch, repoRootDir);
-        if(checkout.err) {
+        if(checkout.err && !checkout.err.includes("Already on")) {
             c.terminal.logError("Error checking out branch: " + checkout.err);
         }
 
         var pull = c.terminal.run("git pull", repoRootDir);
         if(!pull.msg.includes("Already up to date") || isFirstDeployment) {
             var dockerCompose = c.terminal.run("docker compose up -d", composeDir);
-            console.log("Docker compose: ", dockerCompose.msg, dockerCompose.err);
+            if(dockerCompose.err) {
+                c.terminal.logError("Error running docker compose: " + dockerCompose.err);
+            }
         }
     })
 }

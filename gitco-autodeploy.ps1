@@ -1,0 +1,1 @@
+gitco deploy gitco.json

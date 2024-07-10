@@ -1,5 +1,5 @@
 import { spawnSync } from "child_process";
-import { ITerminal, Terminal } from "../terminal";
+import { ITerminal, Terminal } from "../models/terminal";
 
 
 export const validationCheck = async (terminal: ITerminal = new Terminal()): Promise<void> => {

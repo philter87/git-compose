@@ -1,4 +1,4 @@
-import { Terminal, TerminalMock } from "../terminal";
+import { Terminal, TerminalMock } from "../models/terminal";
 import { validationCheck } from "./validation-check";
 
 describe("validation-check", () => {
