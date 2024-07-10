@@ -7,18 +7,17 @@ export interface TerminalResponse {
 }
 
 export interface ITerminal {
-    run(command: string, args: string[], cwd?: string): TerminalResponse;
+    run(command: string, cwd?: string): TerminalResponse;
     logInfo(...msg: string[]) : void;
     logError(...msg: string[]) : void;
 }
 
 
 export class Terminal implements ITerminal {
-    run(command: string, args: string[], cwd: string = "") : TerminalResponse {
+    run(command: string, cwd: string = "") : TerminalResponse {
         cwd = cwd || process.cwd();
         fs.mkdirSync(cwd, { recursive: true });
-        const response = spawnSync(command, args, {encoding: "utf-8", cwd: cwd});
-        console.log("REAL COMMAND", response.stdout, response.stderr);
+        const response = spawnSync(command, {encoding: "utf-8", cwd: cwd, shell: true});
         return {
             msg: response.stdout,
             err: response.stderr
@@ -38,15 +37,12 @@ export class TerminalMock implements ITerminal {
     public lastError: string = "";
     public errors: string[] = [];
     public commands: string[] = [];
-    public commandsJoined: string[] = [];
 
-    constructor(private commandJoined: string = "", private response: TerminalResponse = {"msg": "", err: "Error"}) {}
+    constructor(private cmdPattern: string = "", private response: TerminalResponse = {"msg": "", err: "Error"}) {}
 
-    run(command: string, args: string[] = [], cwd = "") : TerminalResponse{
-        const currentCommandJoined  = `${command} ${args.join(" ")}`;
+    run(command: string, cwd = "") : TerminalResponse{
         this.commands.push(command);
-        this.commandsJoined.push(currentCommandJoined);
-        if (this.commandJoined == currentCommandJoined) {
+        if (this.cmdPattern == command) {
             return this.response;
         }
 

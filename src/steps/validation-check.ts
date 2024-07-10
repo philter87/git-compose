@@ -5,15 +5,13 @@ import { ITerminal, Terminal } from "../terminal";
 export const validationCheck = async (terminal: ITerminal = new Terminal()): Promise<void> => {
     terminal.logInfo("Checking system requirements...")
 
-    const dockerVersion = await terminal.run("docker", ["--version"])
-    const result = await spawnSync("docker", ["--version"], {encoding: "utf-8"});
-    console.log("dockerVersion", dockerVersion.err, dockerVersion.msg);
+    const dockerVersion = await terminal.run("docker --version")
     if (dockerVersion.err) {
         terminal.logError("Docker is not installed. Please install Docker and try again")
         return;
     }
 
-    const dockerPs = await terminal.run("docker", ["ps"]);
+    const dockerPs = await terminal.run("docker ps");
     if (dockerPs.err.includes("running")) {
         terminal.logError(dockerPs.err, "", "Docker is not running. Please start Docker and try again.")
         return;
@@ -29,7 +27,7 @@ export const validationCheck = async (terminal: ITerminal = new Terminal()): Pro
         return;
     }
 
-    const gitVersion = await terminal.run("git", ["--version"]);
+    const gitVersion = await terminal.run("git --version");
     if (gitVersion.err) {
         terminal.logError(gitVersion.err, "", "Git is not installed. Please install Git and try again.");
         return;
