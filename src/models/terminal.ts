@@ -16,7 +16,6 @@ export interface ITerminal {
 export class Terminal implements ITerminal {
     run(command: string, cwd: string = "") : TerminalResponse {
         cwd = cwd || process.cwd();
-        fs.mkdirSync(cwd, { recursive: true });
         const response = spawnSync(command, {encoding: "utf-8", cwd: cwd, shell: true});
         return {
             msg: response.stdout,
