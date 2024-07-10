@@ -9,3 +9,4 @@ web_modules/
 *.tsbuildinfo\
 
 dist
+apps

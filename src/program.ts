@@ -17,7 +17,7 @@ export const runProgram = (c: Context) => {
         .command("deploy")
         .description("Deploy docker-compose applications defined in apps.json")
         .argument("[file]", "The path to the app.json file (default: apps.json)", "apps.json")
-        .action(async (file, options) => await deploy(parseAppsFile(c, file)))
+        .action(async (file, options) => deploy(parseAppsFile(c, file)))
     
     program
         .command("validate")
