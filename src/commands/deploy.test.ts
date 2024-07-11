@@ -31,7 +31,8 @@ const appsConfig1 : AppsConfig = {
 describe("deploy step", () => {
     it("real", () => {
         let c = new Context().withConfig(appConfig);
-        
+
+        const response = c.terminal.run("ls");
         deploy(c);
     })
     it("log: we are using apps.json as default", () => {

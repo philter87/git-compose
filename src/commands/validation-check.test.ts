@@ -9,7 +9,7 @@ describe("validation-check", () => {
     })
 
     it("docker not installed", async () => {
-        const terminal = new TerminalMock("docker --version", {msg: "", err: "docker: command not found"})
+        const terminal = new TerminalMock("docker --version", "docker: command not found")
         
         await validationCheck(terminal) 
 
@@ -17,7 +17,7 @@ describe("validation-check", () => {
     })
 
     it("docker ps - docker not running windows", async () => {
-        const terminal = new TerminalMock("docker ps", {msg: "", err: "error during connect: This error may indicate that the docker daemon is not running.: Get http://%2F%2F.%2Fpipe%2Fdocker_engine/v1.24/containers/json: open //./pipe/docker_engine: The system cannot find the file specified"})
+        const terminal = new TerminalMock("docker ps", "error during connect: This error may indicate that the docker daemon is not running.: Get http://%2F%2F.%2Fpipe%2Fdocker_engine/v1.24/containers/json: open //./pipe/docker_engine: The system cannot find the file specified")
         
         await validationCheck(terminal) 
 
@@ -25,7 +25,7 @@ describe("validation-check", () => {
     })
 
     it("docker ps - docker not running ubuntu", async () => {
-        const terminal = new TerminalMock("docker ps", {msg: "", err: "Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?"})
+        const terminal = new TerminalMock("docker ps", "Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?")
         
         await validationCheck(terminal) 
 
@@ -33,7 +33,7 @@ describe("validation-check", () => {
     })
 
     it("no errors should return empty array", async () => {
-        const terminal = new TerminalMock("X", {msg: "", err: ""})
+        const terminal = new TerminalMock("X", "This is an error we will never see")
         
         await validationCheck(terminal) 
 
