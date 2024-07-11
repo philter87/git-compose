@@ -13,23 +13,23 @@ describe("validation-check", () => {
         
         await validationCheck(terminal) 
 
-        expect(terminal.lastError).toContain("Docker is not installed")
+        terminal.checkIfErrorIsLogged("[ ] Docker installation")
     })
 
-    it("docker ps - docker not running windows", async () => {
+    it("docker ps - docker not running. (Using windows)", async () => {
         const terminal = new TerminalMock("docker ps", "error during connect: This error may indicate that the docker daemon is not running.: Get http://%2F%2F.%2Fpipe%2Fdocker_engine/v1.24/containers/json: open //./pipe/docker_engine: The system cannot find the file specified")
         
         await validationCheck(terminal) 
 
-        expect(terminal.lastError).toContain("Docker is not running")
+        terminal.checkIfErrorIsLogged("[ ] Docker healthiness");
     })
 
-    it("docker ps - docker not running ubuntu", async () => {
+    it("docker ps - docker not running (Using ubuntu)", async () => {
         const terminal = new TerminalMock("docker ps", "Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?")
         
         await validationCheck(terminal) 
 
-        expect(terminal.lastError).toContain("Docker is not running")
+        terminal.checkIfErrorIsLogged("[ ] Docker healthiness");
     })
 
     it("no errors should return empty array", async () => {

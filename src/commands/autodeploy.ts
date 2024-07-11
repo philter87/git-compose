@@ -4,13 +4,13 @@ import { deploy } from "./deploy";
 import * as fs from "fs";
 
 export const autoDeploy = async (c: Context) => {
-    c.logInfo("Enabling auto deploy")
+    c.logInfo("Auto deploy")
     const absConfigPath = path.join(process.cwd(), c.configFilePath);
     const dir = path.dirname(absConfigPath);
+
     
     if(process.platform == "win32") {
-        startCronOnWindows(c);
-        c.logInfo("Automatic change detection enabled - will run every minute");
+        startCronOnWindows(c, dir);
         return;
     }
 
@@ -26,18 +26,24 @@ export const autoDeploy = async (c: Context) => {
     c.logInfo("Cron job added: " + cronTask);
 }
 
-const startCronOnWindows = (c: Context) => {
+const startCronOnWindows = (c: Context, dir: string) => {
     const scriptFile = path.join(dir, "gitco-autodeploy.ps1");
     fs.writeFileSync(scriptFile, "gitco deploy $PSScriptRoot\\" + c.configFilePath);
 
+    const cronDelete = c.terminal.run("schtasks /delete /tn gitco /f");
+    if(cronDelete.msg) {
+        c.logInfo("\tReplacing existing deployment task");
+    }
+    if(cronDelete.isError){
+        c.logError("\tError deleting cron job: " + cronDelete.err);
+    }
 
     const cmd = `schtasks /create /sc MINUTE /mo 1 /tn gitco /tr ${scriptFile} /f`
-    console.log("CMD", cmd)
     const cron = c.terminal.run(cmd);
     if(cron.err) {
-        c.logError("Error creating cron job: " + cron.err);
+        c.logError("\tError creating cron job " + cmd + ". Error: "  + cron.err);
     }
     if(cron.msg) {
-        c.logInfo("Cron job created: " + cron.msg);
+        c.logInfo("\tAutomatic deployments are now enabled. Change detection will run every minute.");
     }
 }
