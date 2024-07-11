@@ -10,7 +10,7 @@ export const autoDeploy = async (c: Context) => {
 
     
     if(process.platform == "win32") {
-        startCronOnWindows(c, dir);
+        startCronOnWindows(c, absConfigPath);
         return;
     }
 
@@ -26,9 +26,9 @@ export const autoDeploy = async (c: Context) => {
     c.logInfo("Cron job added: " + cronTask);
 }
 
-const startCronOnWindows = (c: Context, dir: string) => {
-    const scriptFile = path.join(dir, "gitco-autodeploy.ps1");
-    fs.writeFileSync(scriptFile, "gitco deploy $PSScriptRoot\\" + c.configFilePath);
+const startCronOnWindows = (c: Context, absConfigPath: string) => {
+    // const scriptFile = path.join(dir, "gitco-autodeploy.ps1");
+    // fs.writeFileSync(scriptFile, "gitco deploy $PSScriptRoot\\" + c.configFilePath);
 
     const cronDelete = c.terminal.run("schtasks /delete /tn gitco /f");
     if(cronDelete.msg) {
@@ -38,7 +38,18 @@ const startCronOnWindows = (c: Context, dir: string) => {
         c.logError("\tError deleting cron job: " + cronDelete.err);
     }
 
-    const cmd = `schtasks /create /sc MINUTE /mo 1 /tn gitco /tr ${scriptFile} /f`
+    const scheduledCommand = `powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "gitco deploy ${absConfigPath}"`
+    console.log("Scheduled Command", scheduledCommand)
+    var commandResult = c.terminal.run(scheduledCommand)
+    console.log("Scheduled Error", commandResult.err)
+    console.log("Scheduled Message", commandResult.msg)
+
+    return;
+    // const cmd = `schtasks /create /sc MINUTE /mo 1 /tn gitco /tr "powershell.exe -NoProfile -ExecutionPolicy Bypass -File ${scriptFile}" /f`
+    const cmd = `schtasks /create /sc MINUTE /mo 1 /tn gitco /tr "${scheduledCommand}" /f`
+    console.log("CMD", cmd)
+
+
     const cron = c.terminal.run(cmd);
     if(cron.err) {
         c.logError("\tError creating cron job " + cmd + ". Error: "  + cron.err);

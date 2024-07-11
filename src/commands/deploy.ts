@@ -7,7 +7,10 @@ export const deploy = (c: Context) => {
         c.logInfo("")
         c.logInfo("Deploying app: " + app.appName)
 
-        var appsDir = path.join(process.cwd(), "apps");
+        const absoluteConfigPath = path.join(process.cwd(), c.configFilePath);
+        const configDir = path.dirname(absoluteConfigPath);
+
+        var appsDir = path.join(configDir, "apps");
         var repoRootDir = path.join(appsDir, app.appName!);
         var composeDir = path.join(repoRootDir, app.directory);
 
