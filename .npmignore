@@ -1,8 +1,0 @@
-.git
-*.ts
-src/
-node_modules/
-*.log
-
-.gitignore
-tsconfig.json
