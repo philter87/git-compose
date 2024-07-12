@@ -1,6 +1,6 @@
 {
   "name": "@philter87/gitco",
-  "version": "0.1.7",
+  "version": "0.2.0",
   "description": "A simple CLI tool for automatic docker-compose deployments based on git repository changes.",
   "keywords": [
     "git",
@@ -15,6 +15,7 @@
   "scripts": {
     "build": "npx tsc",
     "buildw": "npx tsc --watch",
+    "prepublishOnly": "npm run build",
     "test": "jest",
     "testw": "jest --watch"
   },
