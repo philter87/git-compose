@@ -31,7 +31,7 @@ export const runProgram = (c: Context) => {
         .command("auto")
         .description("Automatically detect repo changes and deploy")
         .argument("[file]", `The path to the '${DEFAULT_CONFIG_FILE}' file (default: ${DEFAULT_CONFIG_FILE})`, DEFAULT_CONFIG_FILE)
-        .option("-s, --stop", "Disable the automatic deployment", false)
+        .option("-d, --disable", "Disable the automatic deployment", false)
         .action(async (file, options) => {
             autoDeploy(c.withConfigPath(file, options))
         })

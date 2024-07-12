@@ -11,23 +11,55 @@ export const autoDeploy = async (c: Context) => {
         return;
     }
 
-    const cronTask = "* * * * * gitco deploy " + c.configFilePath + " > /var/log/gitco.log 2>&1";
-    c.logInfo("Adding cron job: " + cronTask);
-    const cron = c.terminal.run('crontab -l | { cat; echo "' + cronTask +'"; } | crontab -');
+    const currentCron = c.terminal.run("crontab -l");
+
     
-    if(cron.isError) {
-        c.logError("Error reading cron jobs: " + cron.err);
-        cron.msg = "";
+    if(currentCron.isError && !currentCron.err.includes("no crontab for")) {
+
+        c.logError("Unable to add crontab task, Error: " + currentCron.err);
         return;
     }
-    c.logInfo("Cron job added: " + cronTask);
+
+    const dir = dirname(c.configFilePath);
+    let cronContent = currentCron.msg || "";
+    fs.writeFileSync(path.join(dir, "cron-backup.txt"), cronContent);
+    cronContent = cronContent.split("\n").filter(x => !x.includes("gitco deploy")).join("\n");
+
+    if(!c.optionValues.disable) {
+        // Add new cron job if not trying to disable
+        cronContent = cronContent + "* * * * * gitco deploy " + c.configFilePath + " > /var/log/gitco.log 2>&1\n"
+    }
+
+    
+    const cronFile = path.join(dir, "cron-current.txt");
+    fs.writeFileSync(cronFile, cronContent);
+    
+    const cron = c.terminal.run('crontab ' + cronFile);
+    
+    if(cron.isError) {
+        c.logError("Failed to enable automatic deployment with Error"  + cron.err);
+        return
+    }
+
+    const cronRefresh = c.terminal.run('service cron reload');
+    if(cronRefresh.isError) {
+        c.logError("Failed to reload cron service with Error"  + cronRefresh.err);
+        return;
+    }
+    
+        
+    if(c.optionValues.disable) {
+        c.logInfo("Automatic deployments are now disabled.");
+    } else {
+        c.logInfo("Automatic deployments are now enabled. Change detection will run every minute.");
+    }
 }
 
 const startCronOnWindows2 = (c: Context) => {
     const stop = c.terminal.run("schtasks /delete /tn gitco /f");
 
-    console.log("stop: ", c.optionValues.stop)
-    if(c.optionValues.stop) {
+    console.log("stop: ", c.optionValues.disable)
+    if(c.optionValues.disable) {
         if(stop.isError) {
             c.logInfo("Unable to disable automatic deployments. Maybe it is already disabled. Error: " + stop.err);
         }
