@@ -8,4 +8,8 @@ describe("auto-deploy command", () => {
 
         // autoDeploy(c)
     })
+
+    it("Disable", () => {
+        
+    })
 })

@@ -3,8 +3,9 @@ const figlet = require("figlet");
 import { deploy } from "./commands/deploy";
 import { validationCheck } from "./commands/validation-check";
 import { Context } from "./models/context";
-import { autoDeploy } from "./commands/autodeploy";
+
 import { DEFAULT_CONFIG_FILE } from "./models/constants";
+import { autoDeploy } from "./commands/autodeploy";
 
 export const runProgram = (c: Context) => {
     const program = new Command()
@@ -27,9 +28,10 @@ export const runProgram = (c: Context) => {
         .action(async (file, options) => deploy(c.withConfigPath(file, options)))
 
     program
-        .command("auto-deploy")
+        .command("auto")
         .description("Automatically detect repo changes and deploy")
         .argument("[file]", `The path to the '${DEFAULT_CONFIG_FILE}' file (default: ${DEFAULT_CONFIG_FILE})`, DEFAULT_CONFIG_FILE)
+        .option("-s, --stop", "Disable the automatic deployment", false)
         .action(async (file, options) => {
             autoDeploy(c.withConfigPath(file, options))
         })

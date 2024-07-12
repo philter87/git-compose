@@ -3,6 +3,7 @@ import { ITerminal, Terminal, TerminalMock } from "./terminal";
 import { AppsConfig, } from "./apps";
 import { ConfigReader, ConfigReaderMock, IConfigReader } from "./config-reader";
 import { DEFAULT_CONFIG_FILE } from "./constants";
+import path from "path";
 
 export class Context {
     public terminal: ITerminal = new Terminal();
@@ -32,7 +33,10 @@ export class Context {
     }
 
     withConfigPath = (configPath: string, options: OptionValues = {}): Context => {
-        this.configFilePath = configPath;
+        this.configFilePath = path.isAbsolute(configPath) 
+            ? configPath 
+            : path.join(process.cwd(), configPath)
+            
         this.optionValues = options;
         return this;
     }

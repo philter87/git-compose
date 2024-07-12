@@ -3,12 +3,13 @@ import { Context } from "../models/context";
 import * as fs from 'fs';
 
 export const deploy = (c: Context) => {
+
     c.getAppsConfig().apps.forEach((app) => {
         c.logInfo("")
         c.logInfo("Deploying app: " + app.appName)
 
-        const absoluteConfigPath = path.join(process.cwd(), c.configFilePath);
-        const configDir = path.dirname(absoluteConfigPath);
+    
+        const configDir = path.dirname(c.configFilePath);
 
         var appsDir = path.join(configDir, "apps");
         var repoRootDir = path.join(appsDir, app.appName!);

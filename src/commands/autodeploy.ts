@@ -1,20 +1,17 @@
-import path from "path";
+import path, { dirname } from "path";
 import { Context } from "../models/context";
 import { deploy } from "./deploy";
 import * as fs from "fs";
 
 export const autoDeploy = async (c: Context) => {
     c.logInfo("Auto deploy")
-    const absConfigPath = path.join(process.cwd(), c.configFilePath);
-    const dir = path.dirname(absConfigPath);
-
     
     if(process.platform == "win32") {
-        startCronOnWindows(c, absConfigPath);
+        startCronOnWindows2(c);
         return;
     }
 
-    const cronTask = "* * * * * gitco deploy " + absConfigPath + " > /var/log/gitco.log 2>&1";
+    const cronTask = "* * * * * gitco deploy " + c.configFilePath + " > /var/log/gitco.log 2>&1";
     c.logInfo("Adding cron job: " + cronTask);
     const cron = c.terminal.run('crontab -l | { cat; echo "' + cronTask +'"; } | crontab -');
     
@@ -26,35 +23,39 @@ export const autoDeploy = async (c: Context) => {
     c.logInfo("Cron job added: " + cronTask);
 }
 
-const startCronOnWindows = (c: Context, absConfigPath: string) => {
-    // const scriptFile = path.join(dir, "gitco-autodeploy.ps1");
-    // fs.writeFileSync(scriptFile, "gitco deploy $PSScriptRoot\\" + c.configFilePath);
+const startCronOnWindows2 = (c: Context) => {
+    const stop = c.terminal.run("schtasks /delete /tn gitco /f");
 
-    const cronDelete = c.terminal.run("schtasks /delete /tn gitco /f");
-    if(cronDelete.msg) {
+    console.log("stop: ", c.optionValues.stop)
+    if(c.optionValues.stop) {
+        if(stop.isError) {
+            c.logInfo("Unable to disable automatic deployments. Maybe it is already disabled. Error: " + stop.err);
+        }
+        c.logInfo("Automatic deployments are now disabled.");
+        return;
+    }
+
+    if(stop.msg) {
         c.logInfo("\tReplacing existing deployment task");
     }
-    if(cronDelete.isError){
-        c.logError("\tError deleting cron job: " + cronDelete.err);
+    var scriptFilePath = path.join(dirname(c.configFilePath), "gitco-deploy-script.ps1");
+    fs.writeFileSync(scriptFilePath, `gitco deploy ${c.configFilePath}`);
+
+    var commandResult = c.terminal.run("powershell " + scriptFilePath);
+    if(commandResult.isError) {
+        c.logError("Error running command: " + commandResult.err, commandResult.msg);
+        return;
     }
-
-    const scheduledCommand = `powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "gitco deploy ${absConfigPath}"`
-    console.log("Scheduled Command", scheduledCommand)
-    var commandResult = c.terminal.run(scheduledCommand)
-    console.log("Scheduled Error", commandResult.err)
-    console.log("Scheduled Message", commandResult.msg)
-
-    return;
-    // const cmd = `schtasks /create /sc MINUTE /mo 1 /tn gitco /tr "powershell.exe -NoProfile -ExecutionPolicy Bypass -File ${scriptFile}" /f`
-    const cmd = `schtasks /create /sc MINUTE /mo 1 /tn gitco /tr "${scheduledCommand}" /f`
-    console.log("CMD", cmd)
+    c.logInfo(commandResult.msg)
 
 
+
+    const cmd = `schtasks /create /sc MINUTE /mo 1 /tn gitco /tr "powershell.exe -File ${scriptFilePath}" /f`
+    console.log("cmd: ", cmd)
     const cron = c.terminal.run(cmd);
-    if(cron.err) {
-        c.logError("\tError creating cron job " + cmd + ". Error: "  + cron.err);
+    if(cron.isError) {
+        c.logError("Failed to enable automatic deployment with Error"  + cron.err);
+        return;
     }
-    if(cron.msg) {
-        c.logInfo("\tAutomatic deployments are now enabled. Change detection will run every minute.");
-    }
+    c.logInfo("Automatic deployments are now enabled. Change detection will run every minute.");
 }

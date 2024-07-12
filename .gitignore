@@ -12,3 +12,4 @@ dist
 apps
 
 gitco-test.json
+gitco-deploy-script.ps1

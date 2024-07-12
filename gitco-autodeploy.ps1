@@ -1,1 +1,0 @@
-gitco deploy $PSScriptRoot\.\gitco-test.json
